@@ -5,185 +5,408 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #2E7D32;
-            --background-color: #f4f6f8;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --accent-color: #ff9800;
+            --primary: #10B981;
+            /* Emerald 500 */
+            --primary-dark: #34D399;
+            /* Lighter for dark mode contrast */
+            --background: #0f172a;
+            /* Slate 900 */
+            --surface: #1e293b;
+            /* Slate 800 */
+            --text-main: #f8fafc;
+            /* Slate 50 */
+            --text-muted: #94a3b8;
+            /* Slate 400 */
+            --accent: #fbbf24;
+            /* Amber 400 */
+            --danger: #f87171;
+            /* Red 400 */
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+
+            /* Rich Dark Background */
+            background-image:
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1), 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Subtle Grid Pattern Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
             width: 100%;
-            padding: 1.5rem 0;
+            padding: 2.5rem 0 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
         h1 {
             margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
+            font-weight: 800;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #34D399 0%, #60A5FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        p.subtitle {
+            margin: 8px 0 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            font-weight: 300;
         }
 
         main {
             width: 90%;
-            max-width: 600px;
-            margin-top: 20px;
-            padding-bottom: 40px;
+            max-width: 500px;
+            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
         }
 
-        .scanner-container {
-            background-color: var(--card-color);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
-            text-align: center;
+        /* Scanner Section */
+        .scanner-card {
+            background: rgba(30, 41, 59, 0.7);
+            /* Glassy Surface */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
         }
 
         #reader {
             width: 100%;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            margin-bottom: 10px;
+            position: relative;
+            background-color: #000;
         }
 
-        /* Hide unnecessary scanner elements */
+        #reader video {
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Custom Scanner Overlay */
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: var(--radius-lg);
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: inset 0 0 0 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scan-overlay::after {
+            content: '';
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(52, 211, 153, 0.8);
+            /* Green border */
+            border-radius: 24px;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
         #reader__dashboard_section_csr span,
         #reader__dashboard_section_swaplink {
             display: none !important;
         }
 
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
+        /* Buttons & Controls */
+        #reader__dashboard_section_csr button {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-family: inherit;
+            font-weight: 500;
             margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        button:active {
-            transform: scale(0.98);
+        #reader__dashboard_section_csr button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
+        /* Result Card */
         .result-card {
-            background-color: var(--card-color);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-xl);
+            padding: 0;
+            box-shadow: var(--shadow-lg);
             display: none;
-            /* Hidden by default */
-            animation: slideUp 0.4s ease-out;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(40px) scale(0.95);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
-        .product-header {
+        .product-header-bg {
+            background: linear-gradient(to bottom, rgba(51, 65, 85, 0.5), transparent);
+            padding: 24px;
             display: flex;
-            align-items: center;
             gap: 20px;
-            margin-bottom: 24px;
+            align-items: flex-start;
+            position: relative;
         }
 
         .product-img {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            border-radius: 12px;
-            background-color: #fff;
-            border: 1px solid #eee;
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 8px;
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            flex-grow: 1;
         }
 
         .product-info h2 {
-            margin: 0 0 5px 0;
-            font-size: 1.4rem;
-            color: var(--text-color);
+            margin: 0 0 4px 0;
+            font-size: 1.25rem;
+            line-height: 1.3;
+            color: var(--text-main);
         }
 
-        .brand {
-            color: #666;
-            font-size: 0.95rem;
-            margin: 0;
+        .brand-badge {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 50px;
+            margin-top: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .nutrition-grid {
+        /* Nutri-Score */
+        .nutriscore {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-weight: 900;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-a {
+            background-color: #038141;
+        }
+
+        .score-b {
+            background-color: #85BB2F;
+        }
+
+        .score-c {
+            background-color: #FECB02;
+        }
+
+        .score-d {
+            background-color: #EE8100;
+        }
+
+        .score-e {
+            background-color: #E63E11;
+        }
+
+        .score-unknown {
+            background-color: #475569;
+        }
+
+        .nutrition-body {
+            padding: 24px;
+        }
+
+        .grid-stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
         }
 
-        .nutrient-item {
-            background-color: #fafafa;
-            padding: 12px;
-            border-radius: 10px;
+        .stat-item {
+            background-color: rgba(51, 65, 85, 0.4);
+            border-radius: 16px;
+            padding: 16px 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            border: 1px solid #eee;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .nutrient-label {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 4px;
+        .stat-item:hover {
+            transform: translateY(-2px);
+            background-color: rgba(51, 65, 85, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        .nutrient-value {
-            font-size: 1.1rem;
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .stat-value {
             font-weight: 700;
-            color: var(--secondary-color);
+            font-size: 0.95rem;
+            color: var(--text-main);
         }
 
-        .error-message {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Utility classes */
+        .status-message {
             text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .error {
+            background-color: rgba(127, 29, 29, 0.5);
+            color: #FCA5A5;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .success {
+            background-color: rgba(6, 78, 59, 0.5);
+            color: #6EE7B7;
         }
 
         .loading {
-            color: #666;
-            margin-top: 15px;
-            display: none;
+            background-color: rgba(30, 58, 138, 0.5);
+            color: #93C5FD;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #064E3B;
+            /* Dark Text on bright button */
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-reset:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
         }
     </style>
 </head>
@@ -192,51 +415,71 @@
 
     <header>
         <h1>Food Tracker</h1>
+        <p class="subtitle">Scan deinen Snack</p>
     </header>
 
     <main>
-        <div class="scanner-container">
+        <!-- Scanner Card -->
+        <div class="scanner-card">
             <div id="reader"></div>
-            <p id="scan-status">Scanne einen Barcode...</p>
+            <div class="scan-overlay"></div>
         </div>
 
-        <div id="error-msg" class="error-message"></div>
-        <p id="loading-msg" class="loading">Lade Produktdaten...</p>
+        <!-- Messages -->
+        <div id="loading-msg" class="status-message loading">
+            <span style="font-size: 1.2rem; vertical-align: middle; margin-right: 8px;">⏳</span>
+            Lade Nährwerte...
+        </div>
+        <div id="error-msg" class="status-message error"></div>
 
+        <!-- Result Card -->
         <div id="result" class="result-card">
-            <div class="product-header">
-                <img id="product-image" class="product-img" src="" alt="Produktbild">
+
+            <div class="product-header-bg">
+                <img id="product-image" class="product-img" src="" alt="Produkt">
                 <div class="product-info">
-                    <h2 id="product-name">Produktname</h2>
-                    <p id="product-brand" class="brand">Marke</p>
+                    <h2 id="product-name">Produkt Name</h2>
+                    <span id="product-brand" class="brand-badge">MARKE</span>
                 </div>
+                <!-- Nutri-Score Badge -->
+                <div id="nutri-score" class="nutriscore score-unknown">?</div>
             </div>
 
-            <div class="nutrition-grid">
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Energie</span>
-                    <span id="nutri-energy" class="nutrient-value">-</span>
+            <div class="nutrition-body">
+                <div class="grid-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">⚡</span>
+                        <span id="nutri-energy" class="stat-value">-</span>
+                        <span class="stat-label">Kalorien</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🥓</span>
+                        <span id="nutri-fat" class="stat-value">-</span>
+                        <span class="stat-label">Fett</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🥥</span>
+                        <span id="nutri-saturated" class="stat-value">-</span>
+                        <span class="stat-label">Ges. Fett</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🍬</span>
+                        <span id="nutri-sugar" class="stat-value">-</span>
+                        <span class="stat-label">Zucker</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🧂</span>
+                        <span id="nutri-salt" class="stat-value">-</span>
+                        <span class="stat-label">Salz</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💪</span>
+                        <span id="nutri-protein" class="stat-value">-</span>
+                        <span class="stat-label">Protein</span>
+                    </div>
                 </div>
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Fett</span>
-                    <span id="nutri-fat" class="nutrient-value">-</span>
-                </div>
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Gesättigte Fettsäuren</span>
-                    <span id="nutri-saturated" class="nutrient-value">-</span>
-                </div>
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Zucker</span>
-                    <span id="nutri-sugar" class="nutrient-value">-</span>
-                </div>
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Salz</span>
-                    <span id="nutri-salt" class="nutrient-value">-</span>
-                </div>
-                <div class="nutrient-item">
-                    <span class="nutrient-label">Eiweiß</span>
-                    <span id="nutri-protein" class="nutrient-value">-</span>
-                </div>
+
+                <button class="btn-reset" onclick="resetScanner()">Nächstes Produkt scannen</button>
             </div>
         </div>
     </main>
@@ -248,25 +491,32 @@
         let html5QrcodeScanner;
 
         function onScanSuccess(decodedText, decodedResult) {
-            // Um mehrfache Scans zu vermeiden
-            // html5QrcodeScanner.pause(); // Optional: Scanner pausieren
-
-            console.log(`Scan result: ${decodedText}`, decodedResult);
+            // Pause scanning to prevent multiple triggers
+            if (html5QrcodeScanner) {
+                // html5QrcodeScanner.pause(); 
+            }
             fetchProductData(decodedText);
         }
 
         function onScanFailure(error) {
-            // handle scan failure, usually better to ignore and keep scanning.
-            // console.warn(`Code scan error = ${error}`);
+            // Ignore frame scan failures
         }
 
-        // Scanner initialisieren
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader",
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            /* verbose= */ false
-        );
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        function startScanner() {
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0,
+                        showTorchButtonIfSupported: true
+                    },
+                    /* verbose= */ false
+                );
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }
+        }
 
         async function fetchProductData(barcode) {
             loadingMsg.style.display = 'block';
@@ -281,32 +531,51 @@
 
                 if (data.status === 1) {
                     displayProduct(data.product);
+                    // Scroll to result slightly deferred to ensure render
+                    setTimeout(() => {
+                        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
                 } else {
-                    showError("Produkt nicht gefunden.");
+                    showError("Produkt nicht gefunden 😕");
                 }
             } catch (error) {
                 console.error(error);
-                showError("Fehler beim Abrufen der Daten.");
+                showError("Fehler beim Laden der Daten ⚠️");
             } finally {
                 loadingMsg.style.display = 'none';
             }
         }
 
         function displayProduct(product) {
-            document.getElementById('product-name').textContent = product.product_name || "Unbekanntes Produkt";
-            document.getElementById('product-brand').textContent = product.brands || "Unbekannte Marke";
+            // Basic Info
+            document.getElementById('product-name').textContent = product.product_name || "Unbekannt";
+            document.getElementById('product-brand').textContent = product.brands ? product.brands.split(',')[0] : "Keine Marke";
 
-            // Bild
-            const imgUrl = product.image_front_small_url || product.image_url || 'https://via.placeholder.com/100?text=No+Img';
-            document.getElementById('product-image').src = imgUrl;
+            // Image
+            const imgUrl = product.image_front_small_url || product.image_url;
+            const imgEl = document.getElementById('product-image');
+            imgEl.src = imgUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiBmaWxsPSIjZWVlIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIvPjwvc3ZnPg==';
 
-            // Nährwerte (pro 100g/ml wenn möglich)
+            // Nutri Score
+            const score = product.nutriscore_grade ? product.nutriscore_grade.toLowerCase() : 'unknown';
+            const scoreEl = document.getElementById('nutri-score');
+            scoreEl.textContent = score === 'unknown' ? '?' : score.toUpperCase();
+            scoreEl.className = `nutriscore score-${score}`;
+
+            // Nutrients
             const nutriments = product.nutriments;
-
             const setValue = (id, key, unit = 'g') => {
-                const value = nutriments[key];
-                const display = (value !== undefined && value !== null) ? `${Math.round(value * 10) / 10}${unit}` : '-';
-                document.getElementById(id).textContent = display;
+                const val = nutriments[key];
+                const el = document.getElementById(id);
+                // Check if value exists and is a number
+                if (val !== undefined && val !== null && !isNaN(val)) {
+                    // One decimal place
+                    el.textContent = `${Math.round(val * 10) / 10}${unit}`;
+                    el.style.color = 'var(--text-main)';
+                } else {
+                    el.textContent = '-';
+                    el.style.color = 'var(--text-muted)';
+                }
             };
 
             setValue('nutri-energy', 'energy-kcal', ' kcal');
@@ -316,16 +585,28 @@
             setValue('nutri-salt', 'salt_100g');
             setValue('nutri-protein', 'proteins_100g');
 
+            // Show card
             resultCard.style.display = 'block';
-
-            // Scroll zum Ergebnis
-            resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function showError(msg) {
-            errorMsg.textContent = msg;
+            errorMsg.innerHTML = msg;
             errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
         }
+
+        function resetScanner() {
+            resultCard.style.display = 'none';
+            document.getElementById('product-name').textContent = '';
+            // Scanner continues running in background
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Start immediately
+        startScanner();
+
     </script>
 </body>
 
